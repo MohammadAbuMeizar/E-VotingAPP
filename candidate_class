@@ -1,0 +1,233 @@
+package com.examplee.votinga;
+
+import com.google.firebase.database.Exclude;
+
+import java.io.Serializable;
+
+public class candidate_class implements Serializable {
+
+    String secret;
+String mail;
+String pass;
+
+    public String getMail() {
+        return mail;
+    }
+
+    public void setMail(String mail) {
+        this.mail = mail;
+    }
+
+    public String getPass() {
+        return pass;
+    }
+
+    public void setPass(String pass) {
+        this.pass = pass;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public String getPhone2() {
+        return phone2;
+    }
+
+    public void setPhone2(String phone2) {
+        this.phone2 = phone2;
+    }
+    String nationality_id;
+    String name;
+
+    String district;
+    String firbase_id;
+    boolean vote;
+
+    public boolean isVote() {
+        return vote;
+    }
+
+    public void setVote(boolean vote) {
+        this.vote = vote;
+    }
+
+    String phone;
+    String phone2;
+    int vote_count=0;
+
+    public int getVote_count() {
+        return vote_count;
+    }
+
+    public void setVote_count(int vote_count) {
+        this.vote_count = vote_count;
+    }
+
+    String gender;
+String area;
+String declaration;
+boolean approved;
+boolean filter=false;
+    String fff="";
+
+    public String getFff() {
+        return fff;
+    }
+
+    public void setFff(String fff) {
+        this.fff = fff;
+    }
+
+    public boolean isFilter() {
+        return filter;
+    }
+
+    public void setFilter(boolean filter) {
+        this.filter = filter;
+    }
+
+    public candidate_class() {
+    }
+    @Exclude
+    @Override
+    public String toString() {
+        return 
+         
+                "Name : " + name + "\n\n" +
+
+
+               
+        "District : "+district+"\n\n"+
+                "Gender : " + gender + "\n\n" +
+                "Area : " + area + "\n\n" +
+                "Manifesto : " + declaration + "\n\n" ;
+               
+               
+            
+    }
+    @Exclude
+
+    public String info2() {
+        return
+
+                "Nationality id : " + nationality_id + "\n\n" +
+                        "Full name='" + name + "\n\n" +
+
+                        "Voting area :" + area + "\n\n" +
+
+
+                        "Gender : " + gender + "\n\n" +
+                        "District : " + district + "\n\n" +
+
+                        "Has_been voting : " + vote +"\n\n"+
+
+                        "Declaration : " + declaration + "\n\n" ;
+
+
+
+    }
+    @Exclude
+
+    public String toString3() {
+        return
+
+
+                        "Name='" + name + "\n\n" +
+
+                        "Voting area :" + area + "\n\n" +
+
+
+                        "Gender : " + gender + "\n\n----------------------\n" +
+                        "Voting Count  : " + vote_count + "\n----------------------\n\n" ;
+
+    }
+
+
+    public String getNationality_id() {
+        return nationality_id;
+    }
+
+    public void setNationality_id(String nationality_id) {
+        this.nationality_id = nationality_id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+
+
+
+
+    public String getFirbase_id() {
+        return firbase_id;
+    }
+
+    public void setFirbase_id(String firbase_id) {
+        this.firbase_id = firbase_id;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getArea() {
+        return area;
+    }
+
+    public void setArea(String area) {
+        this.area = area;
+    }
+
+    public String getDeclaration() {
+        return declaration;
+    }
+
+    public void setDeclaration(String declaration) {
+        this.declaration = declaration;
+    }
+
+    public boolean isApproved() {
+        return approved;
+    }
+
+    public void setApproved(boolean approved) {
+        this.approved = approved;
+    }
+
+    @Exclude
+    byte [] profile;
+    @Exclude
+    byte [] adv;
+    @Exclude
+    byte [] ide;
+}
