@@ -1,0 +1,27 @@
+package com.examplee.votinga;
+
+public class chat_can_2 {
+
+    public static final int IMAGE_TYPE=1;
+
+
+    public Chating chat;
+public candidate_class obj;
+
+    public chat_can_2(Chating std, int type, int data, String text, candidate_class how) {
+        this.chat = std;
+
+        this.type = type;
+        this.data = data;
+        this.text = text;
+        this.obj =how;
+
+    }
+
+    public int type;
+    public int data;
+    public String text;
+
+
+
+}
