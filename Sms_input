@@ -1,0 +1,192 @@
+package com.examplee.votinga;
+
+import android.content.Intent;
+import android.os.Bundle;
+
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskExecutors;
+import com.google.firebase.FirebaseException;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.PhoneAuthCredential;
+import com.google.firebase.auth.PhoneAuthProvider;
+
+import java.util.concurrent.TimeUnit;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+
+public class Sms_input extends AppCompatActivity {
+    int lan=1;
+    candidate_class t;
+    voter_class c;
+    int type;
+
+
+    Button reg;
+
+    private String verificationId;
+    private FirebaseAuth mAuth;
+    private ProgressBar progressBar;
+    EditText editText;
+    String ph;
+    public  void Data(){
+        try {
+        Intent intent = getIntent();
+
+        type=(Integer)intent.getSerializableExtra("t");
+
+        if(type==1){
+            c=(voter_class) intent.getSerializableExtra("o");
+            ph=c.getPhone();
+        }
+        if(type==2){
+            t=(candidate_class) intent.getSerializableExtra("o");
+            Toast.makeText(Sms_input.this, t.getPhone(), Toast.LENGTH_LONG).show();
+
+            ph=t.getPhone();
+
+        }
+        if(type==4){
+            c=(voter_class) intent.getSerializableExtra("o");
+            ph=c.getPhone();
+
+        }
+        if(type==3){
+            t=(candidate_class) intent.getSerializableExtra("o");
+            ph=t.getPhone();
+
+        }
+        }catch (Exception r){
+            Toast.makeText(getApplicationContext(),
+                    r.getMessage(), Toast.LENGTH_LONG).show();
+        }
+        //--------------------------
+
+        sendVerificationCode(ph);
+    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_phone_sms);
+        mAuth = FirebaseAuth.getInstance();
+        editText=(EditText)findViewById(R.id.editTextCode) ;
+        progressBar = findViewById(R.id.progressbar);
+
+
+
+        reg=(Button)findViewById(R.id.buttonSignIn);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        getSupportActionBar().hide();
+        Data();
+
+
+
+        editText = findViewById(R.id.editTextCode);
+
+        findViewById(R.id.buttonSignIn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                String code = editText.getText().toString().trim();
+
+                if (code.isEmpty() || code.length() < 6) {
+
+                    editText.setError("Enter code...");
+                    editText.requestFocus();
+                    return;
+                }
+                verifyCode(code);
+            }
+        });
+    }
+    private void verifyCode(String code) {
+        PhoneAuthCredential credential = PhoneAuthProvider.getCredential(verificationId, code);
+        signInWithCredential(credential);
+    }
+
+    private void signInWithCredential(PhoneAuthCredential credential) {
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+
+                            if(type==1){
+                                Intent i = new Intent(getBaseContext(), Main_screen_voter.class);
+                                i.putExtra("o", c);
+                                i.putExtra("lan", lan);
+                                startActivity(i);
+                                finish();
+                            }
+                            if(type==2){
+                                Intent i = new Intent(getBaseContext(), Main_Screen_candidate.class);
+                                i.putExtra("o", t);
+
+                                startActivity(i);
+                                finish();
+                            }
+                            if(type==3){
+                                Intent i = new Intent(getBaseContext(), Main_Screen_candidate.class);
+
+
+                                startActivity(i);
+                                finish();
+                            }
+                            if(type==4){
+                                Intent i = new Intent(getBaseContext(), Main_screen_voter.class);
+
+
+                                startActivity(i);
+                                finish();
+                            }
+                        } else {
+                            Toast.makeText(Sms_input.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
+    }
+
+    private void sendVerificationCode(String number) {
+        progressBar.setVisibility(View.VISIBLE);
+        PhoneAuthProvider.getInstance().verifyPhoneNumber(
+                number,
+                60,
+                TimeUnit.SECONDS,
+                TaskExecutors.MAIN_THREAD,
+                mCallBack
+        );
+
+    }
+
+    private PhoneAuthProvider.OnVerificationStateChangedCallbacks
+            mCallBack = new PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+
+        @Override
+        public void onCodeSent(String s, PhoneAuthProvider.ForceResendingToken forceResendingToken) {
+            super.onCodeSent(s, forceResendingToken);
+            verificationId = s;
+        }
+
+        @Override
+        public void onVerificationCompleted(PhoneAuthCredential phoneAuthCredential) {
+            String code = phoneAuthCredential.getSmsCode();
+            if (code != null) {
+                editText.setText(code);
+                verifyCode(code);
+            }
+        }
+
+        @Override
+        public void onVerificationFailed(FirebaseException e) {
+            Toast.makeText(Sms_input.this, e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+    };
+}
