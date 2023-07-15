@@ -1,0 +1,30 @@
+package com.examplee.votinga;
+
+public class cast_voting {
+
+    public static final int IMAGE_TYPE=1;
+
+
+    public candidate_class obj;
+public voter_class voter_;
+    public candidate_class obj2;
+    public  int voting_from;
+
+    public cast_voting(candidate_class std, int type, int data, String text, voter_class how, candidate_class how2, int cast_by) {
+        this.obj = std;
+        this.obj2 = how2;
+        this.type = type;
+        this.data = data;
+        this.text = text;
+        this.voting_from =cast_by;
+        this.voter_ =how;
+
+    }
+
+    public int type;
+    public int data;
+    public String text;
+
+
+
+}
