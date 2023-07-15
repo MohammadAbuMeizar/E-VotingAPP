@@ -1,0 +1,58 @@
+package com.examplee.votinga;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+
+public class helo_page extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_welcompage);
+    }
+
+
+
+
+    public void logii(View view) {
+        Intent i = new Intent(getBaseContext(), login.class);
+
+
+        startActivity(i);
+        finish();
+    }
+    String[] fa = {"Voter", "Candidate"};
+    String T ="As ";
+    public void select(View view) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(T);
+        builder.setItems(fa, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(which==0){
+                    Intent i = new Intent(getBaseContext(), voter_new_acount.class);
+
+
+                    startActivity(i);
+
+                }
+                if(which==1){
+                    Intent i = new Intent(getBaseContext(), candet_new_acount.class);
+
+
+                    startActivity(i);
+
+
+                }
+            }
+        });
+        builder.show();
+
+    }
+}
