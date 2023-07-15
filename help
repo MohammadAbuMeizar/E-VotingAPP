@@ -1,0 +1,24 @@
+package com.examplee.votinga;
+
+public class help {
+    public static final int IMAGE_TYPE=1;
+
+
+    public candidate_class obj;
+
+    public voter_class join;
+
+    public help(candidate_class std, int type, int data, String text, voter_class join) {
+        this.obj = std;
+        this.join=join;
+
+        this.type = type;
+        this.data = data;
+        this.text = text;
+
+    }
+
+    public int type;
+    public int data;
+    public String text;
+}
