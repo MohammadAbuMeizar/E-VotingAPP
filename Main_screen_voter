@@ -1,0 +1,664 @@
+package com.examplee.votinga;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.DefaultItemAnimator;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.Toolbar;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.navigation.NavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+public class Main_screen_voter extends AppCompatActivity {
+    voter_class s;
+String fff="";
+    String area="";
+    String dis="";
+    boolean f_set=false;
+    String [] voting_area=new String[]{"Amman","Irbid","Balqa","Karak","Ma'an","Mafraq","Tafila","Jerash","Ajloun","Aqaba","Badia","All"};
+    //electoral district
+    String [] Badia=new String[]{"North Bedouins","Middle Bedouin","Southern Bedouins"};
+    String [] number=new String[]{"The First ","The Second","The Third","The Fourth","The Fifth"," The Sixth","The Seventh","The Eighth","The Ninth"};
+    String [] g=new String[]{"Male","Female"};
+    TextView v2;
+    DatabaseReference FM1;
+    DatabaseReference FM2;
+    DatabaseReference FM3;Toolbar toolbar;
+    FirebaseUser user;
+    FirebaseStorage St;
+    StorageReference storageRef,imageRef;
+    ProgressDialog progressDialog;
+    UploadTask uploadTask;
+    private DrawerLayout Drawer;
+    private ActionBarDrawerToggle Bar;
+    private NavigationView nv;
+
+    void save_user(){
+
+        s.setData_base_id(user.getUid());
+        FM1.child(user.getUid()).setValue(s);
+        STORE_IMAGE(s.my_image, user.getUid());
+
+
+
+
+    }
+    public void STORE_IMAGE(byte[] s, String s2) {
+
+        St = FirebaseStorage.getInstance();
+        storageRef = St.getReference();
+        imageRef = storageRef.child("images/"+s2);
+
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMax(100);
+        progressDialog.setMessage("Uploading...");
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.show();
+        progressDialog.setCancelable(false);
+
+        uploadTask = imageRef.putBytes(s);
+
+        uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+
+                progressDialog.incrementProgressBy((int) progress);
+            }
+        });
+
+        uploadTask.addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception exception) {
+
+                Toast.makeText(Main_screen_voter.this,"Error in uploading!",Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+            }
+        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+
+
+                Toast.makeText(Main_screen_voter.this,"Upload successful",Toast.LENGTH_SHORT).show();
+                progressDialog.dismiss();
+
+
+            }
+        });
+    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_voter_main_screen);
+        Intent intent = getIntent();
+        user = FirebaseAuth.getInstance().getCurrentUser() ;
+        FM1 = FirebaseDatabase.getInstance().getReference("Database").child("voter2");
+
+        FM2 =FirebaseDatabase.getInstance().getReference("Database").child("voter2").child(user.getUid());
+
+
+        Drawer = (DrawerLayout)findViewById(R.id.activity_main);
+        Bar = new ActionBarDrawerToggle(this, Drawer,R.string.app_name, R.string.app_name);
+        Drawer.addDrawerListener(Bar);
+        Bar.syncState();
+
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        nv = (NavigationView)findViewById(R.id.nv);
+        nv.setItemIconTintList(null);
+        chois();
+
+
+        if((voter_class) intent.getSerializableExtra("o")!=null &&intent.getSerializableExtra("login")==null )   {
+            s = (voter_class) intent.getSerializableExtra("o");
+            save_user();
+
+
+        }
+        else {
+
+            FM2.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    s = dataSnapshot.getValue(voter_class.class);
+
+
+
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(Main_screen_voter.this, "NOT connected to the Internet", Toast.LENGTH_SHORT).show();
+
+
+
+                }
+            });
+            s2=new ArrayList<>();
+            list=new ArrayList<>();
+            final ImageView a=(ImageView)findViewById(R.id.imageView);
+            FM3 = FirebaseDatabase.getInstance().getReference("Database").child("candidate");
+            FM3.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    s2.clear();
+                    list.clear();
+
+                    for (DataSnapshot d : dataSnapshot.getChildren()) {
+                        candidate_class sa = d.getValue( candidate_class.class);
+                        fff=sa.firbase_id;
+                        if(sa.approved) {
+                            if(f_set) {
+                                if (sa.area.equals(area) && sa.district.equals(dis)) {
+                                    s2.add(sa);
+
+                                }
+                            }
+
+                            else {
+                                s2.add(sa);
+                            }
+                            a.setVisibility(View.GONE);
+                        }
+
+
+
+
+
+                    }
+                    fill_up();
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(), "Sorry try another time Data Base Offline", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+        }
+    }
+    void fill_up(){
+
+
+        for(int i=0;i<s2.size();i++){
+            int r=0;
+            String sp  = s2.get(i).toString();
+
+
+            list.add(new cast_voting(s2.get(i), Chating_voter.IMAGE_TYPE,0,sp, s,null,1));
+
+
+        }
+        cast_1 adapter = new cast_1(list,this);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, RecyclerView.VERTICAL, false);
+
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recyclerView);
+        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setAdapter(adapter);
+
+
+    }
+    List<candidate_class> s2=new ArrayList<>();
+    ArrayList<cast_voting> list=new ArrayList<>();
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(Bar.onOptionsItemSelected(item))
+            return true;
+
+        return super.onOptionsItemSelected(item);
+    }
+    boolean k=false;
+    date_elc obj;
+boolean is_da(){
+
+    DatabaseReference mFirebaseDatabase4=FirebaseDatabase.getInstance().getReference("Database").child("e_date");;
+    mFirebaseDatabase4.addValueEventListener(new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            s2.clear();
+            list.clear();
+
+            for (DataSnapshot d : dataSnapshot.getChildren()) {
+                date_elc obj = d.getValue( date_elc.class);
+                Main_screen_voter.this.obj =obj;
+                Calendar toDayCalendar = Calendar.getInstance();
+                Date date1 = toDayCalendar.getTime();
+                Calendar after_date = Calendar.getInstance();
+                after_date.setTime(obj.date);
+                if(obj.time_from.contains("AM")) {
+                    after_date.set(Calendar.HOUR_OF_DAY, obj.h_from);
+                    after_date.set(Calendar.MINUTE, obj.m_to);
+                }
+                else {
+                    after_date.set(Calendar.HOUR_OF_DAY, obj.h_from +12);
+                    after_date.set(Calendar.MINUTE, obj.m_to);
+                }
+
+                Date date2 = after_date.getTime();
+if(date2.compareTo(date1)<=0){
+    k= true;
+}
+
+
+
+
+            }
+
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Toast.makeText(getApplicationContext(), "Sorry try another time Data Base Offline", Toast.LENGTH_SHORT).show();
+
+        }
+    });
+    return k;
+}
+    void chois(){
+        nv.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        int id = item.getItemId();
+                    /*    if(id==R.id.admin){
+                            final View dialogView;
+
+                            dialogView = View.inflate(voter_name.this, R.layout.admin_login, null);
+
+                            final AlertDialog alertDialog = new AlertDialog.Builder(voter_name.this).create();
+                            final EditText ti=dialogView.findViewById(R.id.editText6);
+                            final EditText text=dialogView.findViewById(R.id.editText7);
+                            ImageView bb= dialogView.findViewById(R.id.imageButton5);
+                            ImageView bb2= dialogView.findViewById(R.id.imageButton4);
+                            bb .setOnClickListener(new View.OnClickListener() {
+
+                                public void onClick(View view) {
+                                    alertDialog.dismiss();
+                                }});
+                            bb2. setOnClickListener(new View.OnClickListener() {
+
+                                public void onClick(View view) {
+                                    if(ti.getText().toString().trim().equals("987654321@hh@.com") &&text.getText().toString().trim().equals("987654321")){
+                                        Intent intent = new Intent(voter_name.this, Main_adm.class);
+
+                                        startActivity(intent);
+                                    }
+                                    else {
+                                        Toast.makeText(getApplicationContext(), "wrong", Toast.LENGTH_SHORT).show();
+                                    }
+
+
+                                    alertDialog.dismiss();
+
+                                }});
+                            alertDialog.setView(dialogView);
+                            alertDialog.show();
+                        }*/
+                        if(id==R.id.logout){
+
+                            final View dialogView;
+
+                              dialogView = View.inflate(Main_screen_voter.this, R.layout.converm, null);
+
+                            final AlertDialog alertDialog = new AlertDialog.Builder(Main_screen_voter.this).create();
+
+                            Button bb= dialogView.findViewById(R.id.buttonConfirm);
+                            Button bb2= dialogView.findViewById(R.id.buttonConfirm2);
+                            bb2 .setOnClickListener(new View.OnClickListener() {
+
+                                public void onClick(View view) {
+                                    alertDialog.dismiss();
+                                }});
+                            bb. setOnClickListener(new View.OnClickListener() {
+
+                                public void onClick(View view) {
+                                    FirebaseAuth    fbAuth = FirebaseAuth.getInstance();
+                                    fbAuth.signOut();
+                                    alertDialog.dismiss();
+                                    Intent intent = new Intent(Main_screen_voter.this, helo_page.class);
+
+                                    startActivity(intent);
+                                    alertDialog.dismiss();
+
+                                }});
+                            alertDialog.setView(dialogView);
+                            alertDialog.show();
+                        }
+
+if(id==R.id.messages){
+    Intent intent = new Intent(Main_screen_voter.this, chat_voter.class);
+
+    intent.putExtra("o", s);
+    startActivity(intent);
+}
+                        if(id==R.id.sVoting){
+                            boolean is_date=is_da();
+if(is_date) {
+    if (!s.isVoting_()) {
+        Intent intent = new Intent(Main_screen_voter.this, Voting.class);
+        intent.putExtra("t", 1);
+        intent.putExtra("o", s);
+        startActivity(intent);
+    } else {
+//Y
+        Toast.makeText(getApplicationContext(), "Sorry you have already voted", Toast.LENGTH_LONG).show();
+
+    }
+}
+else {
+    if(obj!=null) {
+        SimpleDateFormat formatter = new SimpleDateFormat("MM-dd-yyyy");
+        String format = formatter.format(obj.date);
+        format += " From " + obj.h_from + ":" + obj.m_to + " To " + obj.h_to + ":" + obj.m_from;
+        Toast.makeText(getApplicationContext(), format, Toast.LENGTH_LONG).show();
+    }
+    else {
+        Toast.makeText(getApplicationContext(), "Not Set yet", Toast.LENGTH_LONG).show();
+    }
+//Selected election day is
+}
+                        }
+                        if(id==R.id.fillter){
+                            final View dialogView;
+
+                            dialogView = View.inflate(Main_screen_voter.this, R.layout.fille, null);
+
+                            final AlertDialog alertDialog = new AlertDialog.Builder(Main_screen_voter.this).create();
+                            final Spinner spinner = dialogView. findViewById(R.id.sCity);
+                            ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(
+                                    Main_screen_voter.this, android.R.layout.simple_spinner_item, voting_area);
+                            spinnerArrayAdapter.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                            spinner.setAdapter(spinnerArrayAdapter);
+                            spinner.setSelection(0);
+
+                            final Spinner   spinner2=dialogView.findViewById(R.id.sdistrict);
+                            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                                    if(position==0){
+
+                                    }
+                                    if(position==0){
+                                        String a[]=new String[6];
+                                        for(int i=0;i<6;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==1){
+                                        String a[]=new String[9];
+                                        for(int i=0;i<9;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==2){
+                                        String a[]=new String[4];
+                                        for(int i=0;i<4;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==3){
+                                        String a[]=new String[6];
+                                        for(int i=0;i<6;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==4){
+                                        String a[]=new String[3];
+                                        for(int i=0;i<3;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==5){
+                                        String a[]=new String[4];
+                                        for(int i=0;i<4;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==6){
+                                        String a[]=new String[1];
+                                        for(int i=0;i<1;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==7){
+                                        String a[]=new String[2];
+                                        for(int i=0;i<2;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==8){
+                                        String a[]=new String[2];
+                                        for(int i=0;i<2;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==9){
+                                        String a[]=new String[1];
+                                        for(int i=0;i<1;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==10){
+                                        String a[]=new String[2];
+                                        for(int i=0;i<2;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==11){
+                                        String a[]=new String[1];
+                                        for(int i=0;i<1;i++){
+                                            a[i]=number[i]+" electoral district";
+                                        }
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item, a);
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                    if(position==12){
+
+                                        ArrayAdapter<String> c = new ArrayAdapter<String>(
+                                                getApplicationContext(), android.R.layout.simple_spinner_item,Badia );
+                                        c.setDropDownViewResource( android.R.layout.simple_spinner_dropdown_item );
+                                        spinner2.setAdapter(c);
+                                        spinner2.setSelection(0);
+
+                                    }
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parentView) {
+
+                                }
+
+                            });
+                            spinner2.setSelection(0);
+                            Button bb= dialogView.findViewById(R.id.buttonConfirm);
+                            Button bb2= dialogView.findViewById(R.id.buttonConfirm2);
+                            bb2 .setOnClickListener(new View.OnClickListener() {
+
+                                public void onClick(View view) {
+                                    alertDialog.dismiss();
+                                }});
+                            bb. setOnClickListener(new View.OnClickListener() {
+
+                                public void onClick(View view) {
+                                    area=spinner.getSelectedItem().toString();
+                                    dis=spinner2.getSelectedItem().toString();
+                                    f_set=true;
+                                    if(!fff.equals("")) {
+                                        DatabaseReference     mFirebaseDatabase3 = FirebaseDatabase.getInstance().getReference("Database").child("candidate").child(fff);
+                                        mFirebaseDatabase3.child("fff").setValue(area);
+                                        mFirebaseDatabase3.child("fff").setValue(dis);
+                                    }
+                                    alertDialog.dismiss();
+
+                                }});
+                            alertDialog.setView(dialogView);
+                            alertDialog.show();
+                        }
+                        if(id==R.id.Voting){
+
+                            Intent intent = new Intent(Main_screen_voter.this, V_state.class);
+
+
+                            startActivity(intent);
+                        }
+                        if(id==R.id.Communicate){
+                            final View dialogView;
+
+                            dialogView = View.inflate(Main_screen_voter.this, R.layout.admin_messg, null);
+
+                            final AlertDialog alertDialog = new AlertDialog.Builder(Main_screen_voter.this).create();
+                            final EditText ti=dialogView.findViewById(R.id.editText6);
+                            final EditText text=dialogView.findViewById(R.id.editText7);
+                            ImageButton bb= dialogView.findViewById(R.id.imageButton5);
+                            ImageButton bb2= dialogView.findViewById(R.id.imageButton4);
+                            bb .setOnClickListener(new View.OnClickListener() {
+
+                                public void onClick(View view) {
+                                    alertDialog.dismiss();
+                                }});
+                            bb2. setOnClickListener(new View.OnClickListener() {
+
+                                public void onClick(View view) {
+                                  Chating c=new Chating();
+                                  c.title=ti.getText().toString();
+                                    c.text=text.getText().toString();
+                                    c.type=1;
+                                    c.voter_ =s;
+                                    DatabaseReference     D= FirebaseDatabase.getInstance().getReference("Database").child("chat");
+c.at=new Date();
+String id=D.push().getKey();
+c.id_data=id;
+D.child(id).setValue(c);
+                                    Toast.makeText(getApplicationContext(), "Saved", Toast.LENGTH_SHORT).show();
+
+                                    alertDialog.dismiss();
+
+                                }});
+                            alertDialog.setView(dialogView);
+                            alertDialog.show();
+                        }
+
+
+
+                        return true;
+                    }
+
+                });
+
+
+    }
+}
+
+
