@@ -1,0 +1,130 @@
+package com.examplee.votinga;
+
+import com.google.firebase.database.Exclude;
+
+import java.io.Serializable;
+
+public class voter_class implements Serializable {
+    String nationality_id;
+    String full_name;
+    String mail;
+    String pass;
+    String voting_area;
+    String data_base_id;
+    String phone;
+    String gender;
+    String district;
+    String secret;
+boolean voting_;
+
+    @Override
+    public String toString() {
+        return
+                "Nationality id : " + nationality_id + "\n\n" +
+                "Full name='" + full_name + "\n\n" +
+               
+                "Voting area :" + voting_area + "\n\n" +
+              
+              
+                "Gender : " + gender + "\n\n" +
+                "District : " + district + "\n\n" +
+              
+                "Has_been voting : " + voting_ +"\n\n"
+             ;
+    }
+
+    public boolean isVoting_() {
+        return voting_;
+    }
+
+    public void setVoting_(boolean voting_) {
+        this.voting_ = voting_;
+    }
+
+    public String getSecret() {
+        return secret;
+    }
+
+    public void setSecret(String secret) {
+        this.secret = secret;
+    }
+
+    public String getDistrict() {
+        return district;
+    }
+
+    public void setDistrict(String district) {
+        this.district = district;
+    }
+
+    public voter_class(String secret,String nationality_id, String full_name, boolean isshowen, String voting_area, String firbase_id, String phone, String gender, String district) {
+        this.nationality_id = nationality_id;
+        this.full_name = full_name;
+        this.mail = mail;
+        this.pass = pass;
+        this.voting_area = voting_area;
+        this.data_base_id = data_base_id;
+        this.phone = phone;
+        this.gender = gender;
+        this.district = district;
+        this.secret = secret;
+        this.voting_ = false;
+    }
+
+    public voter_class() {
+    }
+
+    public String getNationality_id() {
+        return nationality_id;
+    }
+
+    public void setNationality_id(String nationality_id) {
+        this.nationality_id = nationality_id;
+    }
+
+    public String getFull_name() {
+        return full_name;
+    }
+
+    public void setFull_name(String full_name) {
+        this.full_name = full_name;
+    }
+
+
+
+    public String getVoting_area() {
+        return voting_area;
+    }
+
+    public void setVoting_area(String voting_area) {
+        this.voting_area = voting_area;
+    }
+
+    public String getData_base_id() {
+        return data_base_id;
+    }
+
+    public void setData_base_id(String data_base_id) {
+        this.data_base_id = data_base_id;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    @Exclude
+    byte [] my_image;
+
+}
