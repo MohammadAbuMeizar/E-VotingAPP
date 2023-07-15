@@ -1,0 +1,134 @@
+package com.examplee.votinga;
+
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+public class image_show extends RecyclerView.Adapter {
+    private ArrayList<help> dataSet;
+    Context mContext;
+    int total_types;
+
+
+
+    public static class ImageTypeViewHolder extends RecyclerView.ViewHolder {
+
+        TextView txtType;
+
+
+
+        ImageView image;
+  
+
+
+
+        public ImageTypeViewHolder(View itemView) {
+            super(itemView);
+
+            this.txtType = (TextView) itemView.findViewById(R.id.type);
+
+            this.image = (ImageView) itemView.findViewById(R.id.background);
+
+
+
+
+
+        }
+    }
+
+
+
+    public image_show(ArrayList<help> data, Context context) {
+        this.dataSet = data;
+        this.mContext = context;
+        total_types = dataSet.size();
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View view;
+        switch (viewType) {
+
+            case help.IMAGE_TYPE:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item6, parent, false);
+                return new ImageTypeViewHolder(view);
+
+        }
+        return null;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+
+        switch (dataSet.get(position).type) {
+
+            case 1:
+                return help.IMAGE_TYPE;
+
+            default:
+                return -1;
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int listPosition) {
+
+        final help object = dataSet.get(listPosition);
+        if (object != null) switch (object.type) {
+
+               case help.IMAGE_TYPE:
+                   ((ImageTypeViewHolder) holder).txtType.setText(object.text);
+                   FirebaseStorage storage = FirebaseStorage.getInstance();
+
+                   StorageReference storageRef = storage.getReference();
+                   final StorageReference imageRef = storageRef.child("images/" + object.obj.getFirbase_id()+"adv");
+                   try {
+                       final File localFile = File.createTempFile("images", "jpg");
+                       imageRef.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                           @Override
+                           public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                               Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                               ((ImageTypeViewHolder) holder).image.setImageBitmap(bitmap);
+
+                           }
+                       }).addOnFailureListener(new OnFailureListener() {
+                           @Override
+                           public void onFailure(@NonNull Exception exception) {
+                               Toast.makeText(mContext, imageRef.toString() + "", Toast.LENGTH_SHORT).show();
+
+                           }
+                       });
+                   } catch (IOException e) {
+                   }
+
+                break;
+
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return dataSet.size();
+    }
+
+}
