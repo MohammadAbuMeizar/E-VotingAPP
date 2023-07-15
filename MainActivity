@@ -1,0 +1,138 @@
+package com.examplee.votinga;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity {
+    private final int SPLASH_DISPLAY_LENGTH = 5000;
+
+
+
+
+    String [] voting_area=new String[]{"Amman","Irbid","Balqa","Karak","Ma'an","Mafraq","Tafila","Jerash","Ajloun","Aqaba","Badia"};
+
+    String [] Badia=new String[]{"North Bedouins","Middle Bedouin","Southern Bedouins"};
+    String [] number=new String[]{"The First ","The Second","The Third","The Fourth","The Fifth"," The Sixth","The Seventh","The Eighth","The Ninth"};
+    public  void Our_data(){
+
+
+        List<voter_class> members = new ArrayList<>();
+//    public voter(String secret,String nationality_id, String full_name, boolean isshowen, String voting_area, String firbase_id, String phone, String gender, String district) {
+       members.add(new voter_class("AHU10237","9966521439","Ahmad awadallah",true,voting_area[1],"","+962795056362","Male",number[1]));
+        members.add(new voter_class("RMJ39096","2000227641","Raed obaid",true,voting_area[1],"","+962776508631","Male",number[2]));
+        members.add(new voter_class("YWZ83042","9981055856","Mohammed maizer ",true,voting_area[1],"","+962797811584","Male",number[0]));
+        members.add(new voter_class("MRT18344","2005898789","Yazan Bashar ",true,voting_area[1],"","+962797530125","Male",number[3]));
+        members.add(new voter_class("EQG12628","2005554778","Aws Ababneh ",true,voting_area[1],"","+962790682206","Male",number[4]));
+
+
+
+        final   DatabaseReference rf = FirebaseDatabase.getInstance().getReference("Database").child("voter");
+        for(int i=0;i<members.size();i++){
+            String id;
+            id=rf.push().getKey();
+            rf.child(id).setValue(members.get(i));
+        }
+
+
+
+    }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+       // Our_data();
+        getSupportActionBar().hide();
+
+        new Handler().postDelayed(new Runnable(){
+            @Override
+            public void run() {
+
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser() ;
+                if(user!=null) {
+                    DatabaseReference rf = FirebaseDatabase.getInstance().getReference("Database").child("candidate").child(user.getUid());
+                    DatabaseReference rf2 =FirebaseDatabase.getInstance().getReference("Database").child("voter2").child(user.getUid());
+
+
+
+                    if (rf != null) {
+                        rf.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                candidate_class s = dataSnapshot.getValue(candidate_class.class);
+                                if (s != null) {
+                                    Intent intent = new Intent(MainActivity.this, Main_Screen_candidate.class);
+                                    intent.putExtra("login","d");
+
+                                    startActivity(intent);
+                                    finish();
+
+                                }
+
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+
+                            }
+                        });
+
+                    }
+                    if (rf2 != null) {
+                        rf2.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                voter_class u = dataSnapshot.getValue(voter_class.class);
+                                if (u != null) {
+                                    Intent intent = new Intent(MainActivity.this, Main_screen_voter.class);
+                                    intent.putExtra("login","d");
+                                    startActivity(intent);
+                                    finish();
+
+
+                                }
+
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+
+                            }
+                        });
+
+                    }
+
+
+
+                }
+                else {
+
+                    Intent mainIntent = new Intent(MainActivity.this, helo_page.class);
+                    MainActivity.this.startActivity(mainIntent);
+                    MainActivity.this.finish();
+                }
+
+            }
+
+        }, SPLASH_DISPLAY_LENGTH);
+    }
+}
+
