@@ -1,0 +1,180 @@
+package com.examplee.votinga;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.util.ArrayList;
+
+import androidx.recyclerview.widget.RecyclerView;
+
+public class Recycler_candiate_chat extends RecyclerView.Adapter {
+    private ArrayList<chat_can> data_;
+    Context mContext;
+    int total_types;
+
+
+
+    public static class ImageTypeViewHolder extends RecyclerView.ViewHolder {
+
+        TextView txtType;
+
+
+
+ImageView sender;
+        ImageView remove;
+
+
+
+        public ImageTypeViewHolder(View itemView) {
+            super(itemView);
+
+            this.txtType = (TextView) itemView.findViewById(R.id.type);
+            this.sender = (ImageView) itemView.findViewById(R.id.sender);
+            this.remove = (ImageView) itemView.findViewById(R.id.remove);
+
+
+
+
+
+
+        }
+    }
+
+
+
+    public Recycler_candiate_chat(ArrayList<chat_can> data, Context context) {
+        this.data_ = data;
+        this.mContext = context;
+        total_types = data_.size();
+    }
+
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+        View view;
+        switch (viewType) {
+
+            case chat_can.IMAGE_TYPE:
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_show, parent, false);
+                return new ImageTypeViewHolder(view);
+
+        }
+        return null;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+
+        switch (data_.get(position).type) {
+
+            case 1:
+                return chat_can.IMAGE_TYPE;
+
+            default:
+                return -1;
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int listPosition) {
+
+        final chat_can object = data_.get(listPosition);
+        if (object != null) switch (object.type) {
+
+               case chat_can.IMAGE_TYPE:
+                   ((ImageTypeViewHolder) holder).txtType.setText(object.text);
+                   ((ImageTypeViewHolder) holder).sender.setOnClickListener(new View.OnClickListener() {
+
+                       public void onClick(View view) {
+                           final View dialogView;
+
+                           dialogView = View.inflate(mContext, R.layout.admin_messg, null);
+
+                           final AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
+
+                           final EditText text=dialogView.findViewById(R.id.editText7);
+                           ImageButton bb= dialogView.findViewById(R.id.imageButton5);
+                           ImageButton bb2= dialogView.findViewById(R.id.imageButton4);
+                           bb .setOnClickListener(new View.OnClickListener() {
+
+                               public void onClick(View view) {
+                                   alertDialog.dismiss();
+                               }});
+                           bb2. setOnClickListener(new View.OnClickListener() {
+
+                               public void onClick(View view) {
+
+
+                                  object.chat.replay_sender=text.getText().toString();
+
+                                   DatabaseReference s = FirebaseDatabase.getInstance().getReference("Database").child("chat").child(object.chat.id_data);
+s.setValue(object.chat);
+
+                                   Toast.makeText(mContext, "Saved", Toast.LENGTH_SHORT).show();
+
+                                   alertDialog.dismiss();
+
+                               }});
+                           alertDialog.setView(dialogView);
+                           alertDialog.show();
+
+                       }
+                   });
+                   ((ImageTypeViewHolder) holder).remove.setOnClickListener(new View.OnClickListener() {
+
+                       public void onClick(View view) {
+
+
+                               final View dialogView;
+
+                               dialogView = View.inflate(mContext, R.layout.converm, null);
+
+                               final AlertDialog alertDialog = new AlertDialog.Builder(mContext).create();
+
+                               Button bb= dialogView.findViewById(R.id.buttonConfirm);
+                               Button bb2= dialogView.findViewById(R.id.buttonConfirm2);
+                               bb2 .setOnClickListener(new View.OnClickListener() {
+
+                                   public void onClick(View view) {
+                                       alertDialog.dismiss();
+                                   }});
+                               bb. setOnClickListener(new View.OnClickListener() {
+
+                                   public void onClick(View view) {
+                                       DatabaseReference s = FirebaseDatabase.getInstance().getReference("Database").child("chat").child(object.chat.id_data);
+                                       s.removeValue();
+                                       Toast.makeText(mContext, "removed", Toast.LENGTH_SHORT).show();
+
+                                       alertDialog.dismiss();
+
+                                   }});
+                               alertDialog.setView(dialogView);
+                               alertDialog.show();
+
+                       }
+                   });
+
+
+                break;
+
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return data_.size();
+    }
+
+}
