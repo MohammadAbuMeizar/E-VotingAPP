@@ -1,0 +1,136 @@
+package com.examplee.votinga;
+
+import com.google.firebase.database.Exclude;
+
+import java.io.Serializable;
+import java.util.Date;
+
+public class Chating implements Serializable {
+    String title;
+    String text;
+    voter_class voter_;
+    candidate_class candidate;
+    int type;
+    String replay_recever;
+    String replay_sender;
+    Date at;
+String id_data;
+
+    public String getId_data() {
+        return id_data;
+    }
+
+    public void setId_data(String id_data) {
+        this.id_data = id_data;
+    }
+
+    public Date getAt() {
+        return at;
+    }
+
+    public void setAt(Date at) {
+        this.at = at;
+    }
+
+    public Chating() {
+    }
+
+    public Chating(String title, String text, voter_class v, candidate_class c, int type, String replay_man, String replay_sender) {
+        this.title = title;
+        this.text = text;
+        this.voter_ = v;
+        this.candidate = c;
+        this.type = type;
+        this.replay_recever = replay_man;
+        this.replay_sender = replay_sender;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public voter_class getVoter_() {
+        return voter_;
+    }
+
+    public void setVoter_(voter_class voter_) {
+        this.voter_ = voter_;
+    }
+
+    public candidate_class getCandidate() {
+        return candidate;
+    }
+
+    public void setCandidate(candidate_class candidate) {
+        this.candidate = candidate;
+    }
+
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public String getReplay_recever() {
+        return replay_recever;
+    }
+
+    public void setReplay_recever(String replay_recever) {
+        this.replay_recever = replay_recever;
+    }
+
+    public String getReplay_sender() {
+        return replay_sender;
+    }
+
+    public void setReplay_sender(String replay_sender) {
+        this.replay_sender = replay_sender;
+    }
+
+    @Exclude
+    @Override
+    public String toString() {
+    String x="";
+    if(type==1){
+        x="Title "+title+"\n";
+        x+="Text "+text+"\n\n";
+        x+="Response from management : "+ replay_recever +"\n\n";
+        x+="Reply from the sender : "+replay_sender+"\n\n";
+        String y="";
+        String y2="";
+        if(voter_ !=null){
+            y= voter_.toString();
+            y2="Candidate ";
+        }
+        if(candidate !=null){
+            y= candidate.info2();
+            y2="Voter ";
+        }
+        x+=y2+"Sender information : \n"+y+"\n";
+
+    }
+    if(type==2){
+        x="Title "+title+"\n";
+        x+="Text "+text+"\n\n";
+        x+="Response from candidate : "+ replay_recever +"\n\n";
+        x+="Reply from the voter    : "+replay_sender+"\n\n";
+
+
+    }
+        return x;
+    }
+}
