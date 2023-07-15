@@ -1,0 +1,73 @@
+package com.examplee.votinga;
+
+import java.io.Serializable;
+import java.util.Date;
+
+public class date_elc implements Serializable {
+    Date date;
+    String time_from;
+    String time_to;
+    int h_to =8;
+    int m_from =0;
+    int h_from =8;
+    int m_to =0;
+
+    public int getH_to() {
+        return h_to;
+    }
+
+    public void setH_to(int h_to) {
+        this.h_to = h_to;
+    }
+
+    public int getM_from() {
+        return m_from;
+    }
+
+    public void setM_from(int m_from) {
+        this.m_from = m_from;
+    }
+
+    public int getH_from() {
+        return h_from;
+    }
+
+    public void setH_from(int h_from) {
+        this.h_from = h_from;
+    }
+
+    public int getM_to() {
+        return m_to;
+    }
+
+    public void setM_to(int m_to) {
+        this.m_to = m_to;
+    }
+
+    public date_elc() {
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String getTime_from() {
+        return time_from;
+    }
+
+    public void setTime_from(String time_from) {
+        this.time_from = time_from;
+    }
+
+    public String getTime_to() {
+        return time_to;
+    }
+
+    public void setTime_to(String time_to) {
+        this.time_to = time_to;
+    }
+}
